@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WikiStatic CDN & Imgur Link Engine</title>
+  <title>WikiStatic CDN & Storage Engine</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -107,9 +107,9 @@
           <div>
             <div class="flex items-center gap-2">
               <span class="text-xl font-black tracking-tight bg-gradient-to-r from-white via-slate-100 to-wikia-400 bg-clip-text text-transparent">WikiStatic</span>
-              <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-wikia-500/20 text-wikia-400 border border-wikia-500/30 uppercase font-semibold">Imgur Engine</span>
+              <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-wikia-500/20 text-wikia-400 border border-wikia-500/30 uppercase font-semibold">Vercel Storage</span>
             </div>
-            <p class="text-[11px] text-slate-400 font-mono hidden sm:block">Folder Explorer & Direct Imgur Hosting</p>
+            <p class="text-[11px] text-slate-400 font-mono hidden sm:block">Folder Explorer & Direct Public Link Engine</p>
           </div>
         </div>
 
@@ -129,10 +129,10 @@
         <!-- Action Controls -->
         <div class="flex items-center gap-2.5">
           
-          <!-- Imgur Status Indicator -->
+          <!-- Cloud Status Indicator -->
           <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[11px] font-mono text-emerald-400">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Cloud API: Ready</span>
+            <span id="cloudStatusLabel">Vercel DB: Connected</span>
           </div>
 
           <!-- New Folder Button -->
@@ -194,14 +194,14 @@
         </div>
       </div>
 
-      <!-- Imgur Storage Hint Card -->
+      <!-- Vercel Storage Info Card -->
       <div class="p-3.5 rounded-xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 space-y-2 text-[11px]">
         <div class="flex items-center gap-2 text-emerald-400 font-bold">
-          <i class="fa-solid fa-image text-sm animate-pulse"></i>
-          <span>Direct Public Cloud</span>
+          <i class="fa-solid fa-cloud text-sm animate-pulse"></i>
+          <span>Vercel Cloud Sync</span>
         </div>
         <p class="text-slate-400 text-[10px] leading-relaxed">
-          File gambar yang diunggah akan disimpan ke server cloud publik secara gratis & menghasilkan URL aktif selamanya.
+          Struktur direktori & URL berkas tersinkronisasi otomatis di Cloud Database Vercel.
         </p>
       </div>
 
@@ -546,7 +546,7 @@
         title: 'Character_Paimon_Render.png',
         type: 'Gambar',
         subdomain: 'genshin-impact',
-        originalUrl: 'https://i.ibb.co/68v8L5X/paimon.png',
+        originalUrl: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80',
         mime: 'image/png',
         size: '420 KB',
         date: '2026-11-04',
@@ -600,7 +600,8 @@
     const fileCountDisplay = document.getElementById('fileCountDisplay');
 
     // ==================== INITIALIZATION ====================
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
+      await loadStateFromCloud();
       setupEventListeners();
       setupGlobalDragAndDrop();
       renderApp();
@@ -628,9 +629,52 @@
       });
     }
 
+    // ==================== VERCEL CLOUD DB SINKRONISASI ====================
+    async function loadStateFromCloud() {
+      try {
+        const res = await fetch('/api/storage');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.folders && Array.isArray(data.folders)) foldersState = data.folders;
+          if (data.assets && Array.isArray(data.assets)) assetsState = data.assets;
+          document.getElementById('cloudStatusLabel').textContent = 'Vercel DB: Synced';
+          return;
+        }
+      } catch (err) {
+        console.warn('Gagal membaca Vercel KV API, membaca LocalStorage fallback...', err);
+      }
+
+      // LocalStorage Fallback
+      const savedFolders = localStorage.getItem('wikistatic_folders');
+      const savedAssets = localStorage.getItem('wikistatic_assets');
+      if (savedFolders) foldersState = JSON.parse(savedFolders);
+      if (savedAssets) assetsState = JSON.parse(savedAssets);
+      document.getElementById('cloudStatusLabel').textContent = 'Storage: Local Backup';
+    }
+
+    async function saveStateToCloud() {
+      // Local backup
+      localStorage.setItem('wikistatic_folders', JSON.stringify(foldersState));
+      localStorage.setItem('wikistatic_assets', JSON.stringify(assetsState));
+
+      // Push Vercel Cloud KV
+      try {
+        await fetch('/api/storage', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            folders: foldersState,
+            assets: assetsState
+          })
+        });
+      } catch (err) {
+        console.warn('Gagal sync ke Vercel Cloud DB:', err);
+      }
+    }
+
     // ==================== SMART MULTI-FALLBACK UPLOAD FUNCTION ====================
     async function uploadToImgur(file) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = async () => {
@@ -649,10 +693,10 @@
               if (data.url) return resolve(data.url);
             }
           } catch (err) {
-            console.warn('Endpoint /api/upload tidak ada (Bukan di Vercel), beralih ke CDN Publik...');
+            console.warn('Endpoint /api/upload tidak ada, mengalihkan ke CDN Publik ImgBB...');
           }
 
-          // 2. Opsi ImgBB Free Public CDN (Untuk GitHub Pages, Bebas CORS)
+          // 2. Opsi ImgBB Free Public CDN (Bebas CORS)
           try {
             const formData = new FormData();
             formData.append('image', file);
@@ -669,13 +713,13 @@
               }
             }
           } catch (err) {
-            console.warn('API CDN Publik terhalang CORS/Network, beralih ke DataURL Base64...');
+            console.warn('CDN Publik terhalang CORS, mengalihkan ke DataURL Base64...');
           }
 
-          // 3. Fallback Terakhir: Base64 Data URL (100% Selalu Berhasil & Anti-Crash)
+          // 3. Fallback Terakhir: Base64 Data URL (100% Bebas Crash)
           resolve(reader.result);
         };
-        reader.onerror = (error) => reject(error);
+        reader.onerror = () => resolve(URL.createObjectURL(file));
       });
     }
 
@@ -729,7 +773,7 @@
 
     async function handleDroppedFiles(filesList) {
       const filesArray = Array.from(filesList);
-      showToast(`Mengunggah ${filesArray.length} berkas ke Cloud...`);
+      showToast(`Mengunggah ${filesArray.length} berkas...`);
 
       for (const file of filesArray) {
         let assetType = 'Gambar';
@@ -759,7 +803,8 @@
           };
 
           assetsState.unshift(newAsset);
-          showToast(`Gambar '${file.name}' sukses terunggah!`);
+          saveStateToCloud();
+          showToast(`Berkas '${file.name}' sukses terunggah!`);
         } catch (err) {
           alert(`Gagal upload '${file.name}': ` + err.message);
         }
@@ -1064,6 +1109,7 @@
       };
 
       foldersState.push(newFolder);
+      saveStateToCloud();
       closeCreateFolderModal();
       document.getElementById('newFolderName').value = '';
       showToast(`Folder '/${name}' berhasil dibuat!`);
@@ -1118,6 +1164,7 @@
     function handleMoveAssetFolder(e) {
       if (!activeInspectedAsset) return;
       activeInspectedAsset.folderId = e.target.value;
+      saveStateToCloud();
       showToast('Lokasi folder berkas berhasil dipindahkan!');
       renderApp();
     }
@@ -1131,6 +1178,7 @@
       if (!activeInspectedAsset) return;
       if (confirm(`Apakah Anda yakin ingin menghapus berkas '${activeInspectedAsset.title}'?`)) {
         assetsState = assetsState.filter(a => a.id !== activeInspectedAsset.id);
+        saveStateToCloud();
         closeDetailModal();
         showToast('Berkas berhasil dihapus!');
         renderApp();
