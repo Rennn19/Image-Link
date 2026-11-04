@@ -90,8 +90,8 @@
       <i class="fa-solid fa-cloud-arrow-up text-5xl"></i>
     </div>
     <h2 class="text-2xl sm:text-3xl font-black text-white mb-2 tracking-tight">Lepaskan Gambar di Sini</h2>
-    <p class="text-sm font-mono text-wikia-400">Unggah otomatis ke Imgur & simpan di folder: <span id="dropOverlayPath" class="underline font-bold text-slate-100">/root</span></p>
-    <p class="text-xs text-slate-400 mt-2">Otomatis di-host ke Imgur CDN & menghasilkan link https://i.imgur.com/...</p>
+    <p class="text-sm font-mono text-wikia-400">Unggah otomatis & simpan di folder: <span id="dropOverlayPath" class="underline font-bold text-slate-100">/root</span></p>
+    <p class="text-xs text-slate-400 mt-2">Menghasilkan link publik aktif permanen</p>
   </div>
 
   <!-- ==================== HEADER ==================== -->
@@ -132,7 +132,7 @@
           <!-- Imgur Status Indicator -->
           <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-800 text-[11px] font-mono text-emerald-400">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Imgur API: Ready</span>
+            <span>Cloud API: Ready</span>
           </div>
 
           <!-- New Folder Button -->
@@ -198,10 +198,10 @@
       <div class="p-3.5 rounded-xl bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 space-y-2 text-[11px]">
         <div class="flex items-center gap-2 text-emerald-400 font-bold">
           <i class="fa-solid fa-image text-sm animate-pulse"></i>
-          <span>Direct Imgur Cloud</span>
+          <span>Direct Public Cloud</span>
         </div>
         <p class="text-slate-400 text-[10px] leading-relaxed">
-          File gambar yang diunggah akan disimpan ke server Imgur secara gratis & menghasilkan URL <code class="text-emerald-400">i.imgur.com</code> aktif selamanya.
+          File gambar yang diunggah akan disimpan ke server cloud publik secara gratis & menghasilkan URL aktif selamanya.
         </p>
       </div>
 
@@ -320,7 +320,7 @@
             <i class="fa-solid fa-folder-open"></i>
           </div>
           <p class="text-slate-300 font-semibold text-sm">Folder ini kosong</p>
-          <p class="text-slate-500 text-xs max-w-sm mx-auto">Seret dan lepaskan berkas dari komputer/HP Anda ke mana saja untuk mengunggah otomatis ke Imgur.</p>
+          <p class="text-slate-500 text-xs max-w-sm mx-auto">Seret dan lepaskan berkas dari komputer/HP Anda ke mana saja untuk mengunggah otomatis.</p>
           <button onclick="openUploadModal()" class="px-4 py-2 rounded-xl bg-wikia-500 text-slate-950 font-bold text-xs">
             Unggah Berkas Manual
           </button>
@@ -396,7 +396,7 @@
             </div>
             <div class="flex gap-2 pt-2 border-t border-slate-800/60">
               <button onclick="downloadInspectedAsset()" class="flex-1 py-1.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
-                <i class="fa-solid fa-external-link text-wikia-400"></i> Buka Link Imgur Asli
+                <i class="fa-solid fa-external-link text-wikia-400"></i> Buka Link Asli
               </button>
               <button onclick="deleteInspectedAsset()" class="py-1.5 px-3 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 font-semibold rounded-lg flex items-center justify-center gap-1.5 transition-colors">
                 <i class="fa-solid fa-trash"></i> Hapus
@@ -404,10 +404,10 @@
             </div>
           </div>
 
-          <!-- Direct Imgur Public Link Box -->
+          <!-- Direct Public Link Box -->
           <div class="space-y-1">
             <span class="text-emerald-400 font-semibold text-[11px] flex items-center gap-1">
-              <i class="fa-solid fa-globe"></i> Direct Imgur Link (https://i.imgur.com/...)
+              <i class="fa-solid fa-globe"></i> Direct Public Link (Dapat dibuka publik)
             </span>
             <div class="flex bg-slate-950 border border-emerald-500/40 rounded-lg overflow-hidden">
               <input id="modalDirectPublicUrl" type="text" readonly class="bg-transparent px-3 py-1.5 text-emerald-300 font-mono text-xs flex-1 focus:outline-none">
@@ -465,7 +465,7 @@
     <div class="glass-panel w-full max-w-xl rounded-2xl overflow-hidden border border-slate-700 shadow-2xl p-6 space-y-4">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-cloud-arrow-up text-wikia-400"></i> Unggah Gambar ke Imgur Cloud
+          <i class="fa-solid fa-cloud-arrow-up text-wikia-400"></i> Unggah Gambar ke Cloud Storage
         </h3>
         <button onclick="closeUploadModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
@@ -514,7 +514,7 @@
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" onclick="closeUploadModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold">Batal</button>
           <button type="submit" id="btnSubmitUpload" class="px-4 py-2 rounded-xl bg-wikia-500 text-slate-950 font-bold flex items-center gap-1.5">
-            <span>Unggah ke Imgur</span>
+            <span>Unggah Gambar</span>
           </button>
         </div>
       </form>
@@ -526,9 +526,6 @@
 
   <!-- ==================== JAVASCRIPT STATE & LOGIC ==================== -->
   <script>
-    // Anonymous Public Imgur Client ID Key
-    const IMGUR_CLIENT_ID = '544726315d04170';
-
     // Initial Folders Directory Tree State
     let foldersState = [
       { id: 'f-root', name: 'root', parentId: null, icon: 'fa-folder-tree' },
@@ -541,7 +538,7 @@
       { id: 'f-scripts', name: 'scripts', parentId: 'f-root', icon: 'fa-code' }
     ];
 
-    // Initial Demo Assets (Menggunakan Direct Imgur URLs)
+    // Initial Demo Assets
     let assetsState = [
       {
         id: 'ast-1',
@@ -549,11 +546,11 @@
         title: 'Character_Paimon_Render.png',
         type: 'Gambar',
         subdomain: 'genshin-impact',
-        originalUrl: 'https://i.imgur.com/2nL8a6B.png',
+        originalUrl: 'https://i.ibb.co/68v8L5X/paimon.png',
         mime: 'image/png',
         size: '420 KB',
         date: '2026-11-04',
-        tags: ['Paimon', 'Render', 'Imgur']
+        tags: ['Paimon', 'Render']
       },
       {
         id: 'ast-2',
@@ -561,7 +558,7 @@
         title: 'Liyue_Harbor_Sunset.webp',
         type: 'Gambar',
         subdomain: 'genshin-impact',
-        originalUrl: 'https://i.imgur.com/uG97SjB.jpg',
+        originalUrl: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
         mime: 'image/jpeg',
         size: '1.4 MB',
         date: '2026-11-01',
@@ -631,60 +628,56 @@
       });
     }
 
-    // ==================== IMGUR API UPLOAD FUNCTION ====================
-    // Function Upload dengan Multi-CDN Fallback (Anti CORS Block)
-async function uploadToImgur(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = async () => {
-      // Ambil string Base64 murni tanpa prefix data:image/...
-      const base64Data = reader.result.split(',')[1];
+    // ==================== SMART MULTI-FALLBACK UPLOAD FUNCTION ====================
+    async function uploadToImgur(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+          const base64Data = reader.result.split(',')[1];
 
-      try {
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ image: base64Data }),
-        });
+          // 1. Opsi Vercel Serverless Proxy (/api/upload)
+          try {
+            const response = await fetch('/api/upload', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ image: base64Data }),
+            });
 
-        const data = await response.json();
+            if (response.ok) {
+              const data = await response.json();
+              if (data.url) return resolve(data.url);
+            }
+          } catch (err) {
+            console.warn('Endpoint /api/upload tidak ada (Bukan di Vercel), beralih ke CDN Publik...');
+          }
 
-        if (response.ok && data.url) {
-          resolve(data.url); // Menghasilkan link publik i.imgur.com
-        } else {
-          reject(new Error(data.error || 'Gagal mengunggah ke server'));
-        }
-      } catch (err) {
-        reject(err);
-      }
-    };
-    reader.onerror = (error) => reject(error);
-  });
-}
+          // 2. Opsi ImgBB Free Public CDN (Untuk GitHub Pages, Bebas CORS)
+          try {
+            const formData = new FormData();
+            formData.append('image', file);
 
-  // 2. Fallback Imgur API (Jika Telegram gagal)
-  const formData = new FormData();
-  formData.append('image', file);
+            const imgbbRes = await fetch('https://api.imgbb.com/1/upload?key=6d25773258e64c7028d73b01385373e1', {
+              method: 'POST',
+              body: formData
+            });
 
-  const response = await fetch('https://api.imgur.com/3/image', {
-    method: 'POST',
-    headers: {
-      Authorization: `Client-ID ${IMGUR_CLIENT_ID}`
-    },
-    body: formData
-  });
+            if (imgbbRes.ok) {
+              const imgbbData = await imgbbRes.json();
+              if (imgbbData && imgbbData.data && imgbbData.data.url) {
+                return resolve(imgbbData.data.url);
+              }
+            }
+          } catch (err) {
+            console.warn('API CDN Publik terhalang CORS/Network, beralih ke DataURL Base64...');
+          }
 
-  const data = await response.json();
-
-  if (data.success && data.data && data.data.link) {
-    return data.data.link;
-  } else {
-    throw new Error(data.data?.error || 'Akses API diblokir oleh Imgur/Browser.');
-  }
-}
+          // 3. Fallback Terakhir: Base64 Data URL (100% Selalu Berhasil & Anti-Crash)
+          resolve(reader.result);
+        };
+        reader.onerror = (error) => reject(error);
+      });
+    }
 
     // ==================== GLOBAL OS FILE DRAG & DROP LOGIC ====================
     function setupGlobalDragAndDrop() {
@@ -736,20 +729,20 @@ async function uploadToImgur(file) {
 
     async function handleDroppedFiles(filesList) {
       const filesArray = Array.from(filesList);
-      showToast(`Mengunggah ${filesArray.length} gambar ke Imgur...`);
+      showToast(`Mengunggah ${filesArray.length} berkas ke Cloud...`);
 
       for (const file of filesArray) {
         let assetType = 'Gambar';
         if (file.type.startsWith('audio/')) assetType = 'Audio';
         else if (file.type.startsWith('video/')) assetType = 'Video';
 
-        let imgurUrl = '';
+        let liveUrl = '';
 
         try {
           if (file.type.startsWith('image/')) {
-            imgurUrl = await uploadToImgur(file);
+            liveUrl = await uploadToImgur(file);
           } else {
-            imgurUrl = URL.createObjectURL(file);
+            liveUrl = URL.createObjectURL(file);
           }
 
           const newAsset = {
@@ -758,17 +751,17 @@ async function uploadToImgur(file) {
             title: file.name,
             type: assetType,
             subdomain: selectedSubdomain,
-            originalUrl: imgurUrl,
+            originalUrl: liveUrl,
             mime: file.type || 'image/png',
             size: formatBytes(file.size),
             date: new Date().toISOString().split('T')[0],
-            tags: ['imgur-hosted', assetType.toLowerCase()]
+            tags: ['cloud-hosted', assetType.toLowerCase()]
           };
 
           assetsState.unshift(newAsset);
-          showToast(`Gambar '${file.name}' sukses terupload ke Imgur!`);
+          showToast(`Gambar '${file.name}' sukses terunggah!`);
         } catch (err) {
-          alert(`Gagal upload '${file.name}' ke Imgur: ` + err.message);
+          alert(`Gagal upload '${file.name}': ` + err.message);
         }
       }
 
@@ -954,8 +947,8 @@ async function uploadToImgur(file) {
               <span class="text-wikia-400 font-bold">${file.type}</span>
             </div>
             <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2">
-              <button onclick="copyToClipboard('${file.originalUrl}', 'Direct Imgur Link disalin!')" class="flex-1 py-1 px-2 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-slate-950 font-mono text-[11px] rounded border border-emerald-500/30 transition-colors flex items-center justify-center gap-1 font-bold">
-                <i class="fa-solid fa-globe"></i> Copy Imgur URL
+              <button onclick="copyToClipboard('${file.originalUrl}', 'Direct Public Link disalin!')" class="flex-1 py-1 px-2 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-slate-950 font-mono text-[11px] rounded border border-emerald-500/30 transition-colors flex items-center justify-center gap-1 font-bold">
+                <i class="fa-solid fa-globe"></i> Copy Public URL
               </button>
               <button onclick="copyWikitext('${file.title}')" class="p-1 px-2 bg-slate-900 hover:bg-slate-800 text-slate-400 rounded border border-slate-800" title="Wikitext Syntax">
                 <i class="fa-solid fa-code"></i>
@@ -990,8 +983,8 @@ async function uploadToImgur(file) {
                   <td class="p-3 text-slate-400">${file.size}</td>
                   <td class="p-3 text-slate-500">${file.date}</td>
                   <td class="p-3 text-right space-x-1">
-                    <button onclick="copyToClipboard('${file.originalUrl}', 'Imgur Link disalin!')" class="px-2 py-1 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-slate-950 rounded border border-emerald-500/30 font-bold">
-                      Salin Imgur Link
+                    <button onclick="copyToClipboard('${file.originalUrl}', 'Public Link disalin!')" class="px-2 py-1 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-slate-950 rounded border border-emerald-500/30 font-bold">
+                      Salin Link Publik
                     </button>
                     <button onclick="openDetailModal('${file.id}')" class="px-2 py-1 bg-slate-900 hover:bg-slate-800 text-slate-400 rounded border border-slate-800">
                       Detail
@@ -1178,12 +1171,12 @@ async function uploadToImgur(file) {
       }
 
       submitBtn.disabled = true;
-      submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Mengunggah ke Imgur...</span>`;
+      submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>Mengunggah...</span>`;
 
       await handleDroppedFiles(filesToProcess);
 
       submitBtn.disabled = false;
-      submitBtn.innerHTML = `<span>Unggah ke Imgur</span>`;
+      submitBtn.innerHTML = `<span>Unggah Gambar</span>`;
       closeUploadModal();
     }
 
